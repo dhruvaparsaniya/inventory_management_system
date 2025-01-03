@@ -1,9 +1,9 @@
 employee_username,producct_id,quantity_sold,total_amount
-abc,1,2,60
-abc,1,3,30
-abc,1,2,3030
-abc,1,2,60
-abc,1,2,60
-xyz,1,3,90
-abc,1,2,60
-abc,1,2,60
+allen,1,2,80
+allen,1,3,45000
+ella,2,2,600
+alex,2,2,600
+allen,3,2,30000
+dhruva,3,3,3000
+allen,4,2,20000
+alex,5,2,120
