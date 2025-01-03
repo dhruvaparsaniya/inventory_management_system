@@ -1,5 +1,5 @@
 username,password,role
-abc,abc,clerk
-xyz,xyz,managerasd,asd,asd
-asd,asd,asd
-asdf,asdf,adsf
+allen,xyz@12345,clerk
+ella,abc@12345,manager
+alex,asd#12345,assistant
+dhruva,dhruva_12345,manager
