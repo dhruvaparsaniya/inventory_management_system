@@ -1,15 +1,12 @@
 import csv
 
-with open('users.csv',mode='r') as file:
+with open('users.csv',mode='r') as file:  #read and store users.csv to user_data
     csv_reader=csv.DictReader(file)
     user_data=[]
     for row in csv_reader:
         user_data.append(row)
     file.close()
-# for data in user_data:
-#     print(data)
-
-with open('inventory.csv',mode='r') as file:
+with open('inventory.csv',mode='r') as file: #read and store inventory.csv to product_data
     csv_reader=csv.DictReader(file)
     product_data=[]
     for row in csv_reader:
@@ -18,21 +15,21 @@ with open('inventory.csv',mode='r') as file:
 for data in product_data:
     print(data)
 
-with open('transaction.csv',mode='r') as file:
+with open('transaction.csv',mode='r') as file:  #read and store transaction.csv to product_data
     csv_reader=csv.DictReader(file)
     transaction_data=[]
     for row in csv_reader:
         transaction_data.append(row)
     file.close()
 
-def validate(p_id):
+def validate(p_id): # validate unique product id 
     p_temp=False
     for product in product_data:
         if product['product_id'] != p_id:
             p_temp=True
     return p_temp
 
-def product_validate(id,quantity):
+def product_validate(id,quantity): #validate for id and quantity available in inventory
     p_temp=False
     for product in product_data:
         if product['product_id'] == id:
@@ -50,10 +47,10 @@ def product_validate(id,quantity):
 class Admin:
     # def __init__():
     #     pass
-    def add_product():
+    def add_product(self): #add product to inventory
         while True:
             id=input("add product id: ")
-            a=validate(id)
+            a=validate(id) #call validate function for unique product id
             if a:
                 name=input("add product name: ")
                 quantity=int(input("add product quantity: "))
@@ -63,7 +60,7 @@ class Admin:
                 dict['name']=name
                 dict['quantity']=quantity
                 dict['price']=price
-                with open('users.csv',mode='a') as file:
+                with open('users.csv',mode='a') as file:  #write data to inventory.csv
                     writer=csv.DictWriter(file,fieldnames=['id','name','quantity','price'])
                     writer.writerow(dict)
                     file.close()
@@ -72,9 +69,7 @@ class Admin:
                 return True
             else:
                 print(f"id:{id} is already in inventory.use different id")
-    def upate_product_stock(self):
-        pass
-    def add_employee(self):
+    def add_employee(self): #add new employee to user.csv
         e_name=input("to add employee enter employee name: ")
         e_password=input("add employee password: ")
         e_role=input("add employee role: ")
@@ -87,20 +82,20 @@ class Admin:
             writer.writerow(dict)
             file.close()
         return True
-    def view_transaction(self):
+    def view_transaction(self): #show all the data from transaction.csv file
         print("employee_username | producct_id | quantity_sold | total_amount ")
         for i in transaction_data:
             if i != None:
                 print (f"{i['employee_username']} | {i['producct_id']} | {i['quantity_sold']} | {i['total_amount']}")
             else:
                 print("there is no transaction history to show")
-    def update_product_stock():
+    def update_product_stock(self): #update stock of perticular product based on id
         id=input("enter id to update product")
         quantity=int(input("enter quntity that you want to add:"))
 
         product_list=[]
         for product in product_data:       
-            if(product['product_id']==id):
+            if(product['product_id']==id): #update data of perticular product
                 product_quantity=int(product['quantity'])+quantity
                 row={'product_id':product['product_id'] ,
                     'product_name':product['product_name'],
@@ -124,15 +119,27 @@ class Admin:
 class Employee:
     username=""
     def __init__(self,username):
-        self.username=username
-    def view_product_list(self):
+        self.username=username  
+    def login(self,username,password): #authenticate user with username,password
+        temp_pass=False
+        temp_username=False
+        for user in user_data:
+            if username==user['username']:
+                if password==user['password']:
+                    print('login success')
+                    return True
+                else:
+                    return("Wrong Password. Please enter the correct password.")
+            else:
+                return("plese ask administration for registration")
+    def view_product_list(self): #display all product from inventory
         print("product_id | producct_name | quantity | price ")
         for i in product_data:
             if i != None:
                 print (f"{i['product_id']} | {i['product_name']} | {i['quantity']} | {i['price']}")
             else:
                 print("there is no transaction history to show")
-    def sell_product(self):
+    def sell_product(self): #sell product based on id,quantity
         while True:
             id=input("id of product: ")
             quantity=int(input("quantity of product: "))
@@ -154,7 +161,7 @@ class Employee:
                     writer.writerow(dict)
                     file.close()
                     print(dict)
-
+                #update quantity of product in inventory based on sales data
                 update_quantity_list=[]
                 for product in product_data:       
                     if(product['product_id']==id):
@@ -180,29 +187,14 @@ class Employee:
                     break
                 else:
                     print(value_validate)
-    def view_transactions(self):
+    def view_transactions(self): #diplay all the sales made by user
         total_sale=0
         for data in transaction_data:
             if(data['employee_username']==username):
                 total_sale=total_sale+int(data['total_amount'])
             print(f"{username},your total sale:{total_sale}")
 
-
-
-def login(username,password):
-    temp_pass=False
-    temp_username=False
-    for user in user_data:
-        if username==user['username']:
-            if password==user['password']:
-                print('login success')
-                return True
-            else:
-                return("Wrong Password. Please enter the correct password.")
-        else:
-            return("plese ask administration for registration")
-
-
+#create menu for user 
 while True:
     print("----------------------")
     print("select the role:")
@@ -212,37 +204,38 @@ while True:
     print("----------------------")
     role=int(input("enter your choice:"))
     if(role==1):
+        #authenticate administrator
         username=input("enter username: ")
         password=input("enter password: ")
         if(username == 'admin' and password == 'admin'):
             while True:
+
                 print("----------------------")
                 print("Admin functionality: \n 1.Add new Product\n 2.Update product stock \n 3.Add new Employee \n 4.View transaction \n 5.log out" )
                 print("----------------------")
-
                 admin_choice=int(input("select what you want to do:"))
                 object_admin=Admin()
-                match admin_choice:
+                match admin_choice:  #select functionality based on admin choice
                     case 1:
                         print("Add new product")
-                        if object_admin.add_product():
+                        if object_admin.add_product(): #call add product from admin class
                             print("product added sucsessfully")
                         else:
                             print("oops!!! something went wrong")
                     case 2:
                         print("Update product stock")
-                        object_admin.upate_product_stock()
+                        object_admin.upate_product_stock() #call update product stock from admin class
                     case 3:
                         print("Add new Employee")
-                        if object_admin.add_employee():
+                        if object_admin.add_employee(): #call add employee methon
                             print("employee added sucsessfully")
                         else:
                             print("oops!!! something went wrong")
                     case 4:
-                        print("View transaction")
+                        print("View transaction") #call view transaction methon
                         object_admin.view_transaction()
                     case 5:
-                        print("log out")
+                        print("log out")  #log out the existing user
                         break
                     case _:
                         print("invalid choise")
@@ -251,31 +244,26 @@ while True:
     elif (role==2):
         username=input("enter user name: ")
         password=input("enter password: ")
-        value_login=login(username,password)
+        value_login=object_employee.login(username,password) #call login method to authenticate user
         if value_login==True:
             while True:
                 print("log in sucsess")
                 print("----------------------")
-                print("User functionality: \n 1.View Product list \n 2.Sell a product \n 3.Store ransaction details \n 4.View Personal Sales Summary \n 5.log out" )
+                print("User functionality: \n 1.View Product list \n 2.Sell a product and Store transaction details \n 3.View Personal Sales Summary \n 4.log out" )
                 print("----------------------")
                 user_choice=int(input("select what you want to do:"))
                 object_employee=Employee(username)
-                match user_choice:
+                match user_choice: #select functionality based on user choice
                         case 1:
                             print("View Product list")
                             object_employee.view_product_list()
                         case 2:
-                            print("Sell a product")
+                            print("Sell a product and store transaction")
                             object_employee.sell_product()
                         case 3:
-                            print("Store Transaction details")
-                            #object_employee.store_transaction()
-                            
-                        case 4:
                             print("View Personal Sales Summary")
                             object_employee.view_transactions()  
-
-                        case 5:
+                        case 4:
                             print("log out")
                             break
                         case _:
@@ -283,8 +271,6 @@ while True:
         else:
             print(value_login)
     elif (role==3):
-        exit()
+        exit() #make exit from infinite loop
     else:
         print("enter valid choice.")
-
-
