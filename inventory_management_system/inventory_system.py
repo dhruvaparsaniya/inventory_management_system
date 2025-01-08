@@ -1,5 +1,15 @@
 import csv
+from cryptography.fernet import Fernet
 import re
+import maskpass
+
+# key=Fernet.generate_key()
+# print(key)
+crypto_key = b'uizHa8eLeh7R-gJm7qPHWaXVqAM-uRNMXvhDsSqahQ8='
+
+fernet = Fernet(crypto_key)
+
+print(f'Fixed encryption key: {crypto_key}')
 
 def read_csv(filename):
     try:
@@ -48,7 +58,8 @@ def validate_password(password):
 
 # Admin class
 class Admin:
-    def __init__(self, product_data, transaction_data):
+    def __init__(self, user_data, product_data, transaction_data):
+        self.user_data=user_data
         self.product_data = product_data
         self.transaction_data = transaction_data
 
@@ -85,14 +96,15 @@ class Admin:
         if validate_username(username):
             if validdate_user(username):
                 password = input("Enter password (min 8 chars,1 Uppercase letter,1 number: ")
-                # if print(validate_password(password)):
                 if validate_password(password):
+                    enc_password = fernet.encrypt(password.encode()).decode()
                     role = input("Enter employee role (clerk/manager/assistant):")
                     new_employee = {
                         'username': username,
-                        'password': password,
+                        'password': enc_password,
                         'role': role
                     }
+                    self.user_data.append(new_employee)
                     append_to_csv('users.csv', [new_employee], ['username', 'password', 'role'])
                     print("Employee added successfully.")
 
@@ -133,8 +145,9 @@ class Admin:
 
 # Employee class
 class Employee:
-    def __init__(self, username, product_data, transaction_data):
+    def __init__(self, username, user_data, product_data, transaction_data):
         self.username = username
+        self.user_data=user_data
         self.product_data = product_data
         self.transaction_data = transaction_data
         # self.password=password
@@ -142,12 +155,14 @@ class Employee:
         #import pdb;pdb.set_trace()
         temp=True
         for user in user_data:
-            print(user)
             if user['username'] != username:
                 temp="Username not found.please ask administration for registration"
             else:
-                if user['password'] != password:
+                u=user['password']
+                dec_pass = fernet.decrypt(u).decode()
+                if dec_pass != password:
                     temp="Wrong Password. Please enter the correct password."
+                    return temp
                 else:
                     temp=True
                     return temp              
@@ -215,7 +230,7 @@ while True:
         username = input("Enter username: ")
         password = input("Enter password: ")
         if username == 'admin' and password == 'admin':
-            admin = Admin(product_data, transaction_data)
+            admin = Admin(user_data, product_data, transaction_data)
             while True:
                 print("----------------------")
                 print("Admin functionality:")
@@ -244,8 +259,8 @@ while True:
 
     elif role == '2':
         username = input("Enter username: ")
-        password = input("Enter password: ")
-        employee = Employee(username, product_data, transaction_data)
+        password=maskpass.askpass(prompt="Enter Password:", mask="*")
+        employee = Employee(username, user_data, product_data, transaction_data)
         verify=employee.log_in(username,password)
         if(verify==True):  
             while True:
